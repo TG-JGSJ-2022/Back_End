@@ -1,17 +1,20 @@
-from app import app
-from app.proxy_red_neuronal import red_neuronal
-from flask import request
-from app import  constants
 import base64
 import numpy as np
 import cv2
 from math import ceil, floor 
 
+from app import app
+from app.proxy_red_neuronal import red_neuronal
+from flask import request
+from app import  constants
+from app.models import savebyjson
+
+
 @app.route("/recibir-imagen", methods=['POST'])
 def ejempo_red_neuronal():
     """Funcion de ejemplo para el funcionaminto de la red neuronal
     
-    Returns:
+    Guardar:
         response: respuesta de la solicitud
     """
     
@@ -26,8 +29,12 @@ def ejempo_red_neuronal():
     _, buffer = cv2.imencode(".png", resized_image)
 
     image_base64 = base64.b64encode(buffer)
+    
+    resultado = red_neuronal(image_base64)
 
-    return red_neuronal(image_base64)
+    savebyjson(resultado)
+    
+    return resultado
 
 
 
