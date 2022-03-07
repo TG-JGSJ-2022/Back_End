@@ -1,11 +1,14 @@
 from app import app
 from app.proxy_red_neuronal import red_neuronal
 from app import  constants
+from app.models import savebyjson
 @app.route("/ejemplo")
 def ejempo_red_neuronal():
     """Funcion de ejemplo para el funcionaminto de la red neuronal
     
-    Returns:
+    Guardar:
         response: respuesta de la solicitud
     """
-    return red_neuronal(constants.IMAGEN)
+    guardar= red_neuronal(constants.IMAGEN)
+    return savebyjson(guardar)
+
