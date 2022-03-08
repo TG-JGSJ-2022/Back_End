@@ -9,7 +9,6 @@ from flask import request
 from app import  constants
 from app.models import savebyjson
 
-
 @app.route("/recibir-imagen", methods=['POST'])
 def ejempo_red_neuronal():
     """Funcion de ejemplo para el funcionaminto de la red neuronal

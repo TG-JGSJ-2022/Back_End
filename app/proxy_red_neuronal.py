@@ -18,7 +18,6 @@ def red_neuronal(image)->dict():
         "nn_model":"InceptionV3"
     }
     response =  requests.post(constants.URL_RED_NEURONAL,json=body)
-    print(response.json())
     if response.status_code != 200:
         return {"satsus":"Error"}
     return response.json()
