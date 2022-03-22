@@ -1,7 +1,7 @@
 """En el siguiente scrip se va a encontrar los modelos de clases para ser mapeadas 
 en MySql con sqlalchemy 
 """
-import db
+import app.db as db
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -12,8 +12,13 @@ from sqlalchemy import (
     Float,
     Time,
     Date,
+    insert,
+    select,
 )
+
 from sqlalchemy.orm import relationship
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash
 
 porfesor_x_clase = Table(
     "profesorXclase",
@@ -29,7 +34,7 @@ estudiante_x_clase = Table(
 )
 
 
-class Usuario(db.Base):
+class Usuario(UserMixin, db.Base):
     """
     Clase usuario, dentro de esta clase se
     encuentra el valor type el cual ayuda a
@@ -41,15 +46,34 @@ class Usuario(db.Base):
     __tablename__ = "usuario"
     id = Column(Integer, primary_key=True)
     user = Column(String(20), nullable=False, unique=True)
-    password = Column(String(20), nullable=False)
+    password = Column(String(200), nullable=False)
     name = Column(String(20), nullable=False)
     last_name = Column(String(20), nullable=False)
     type = Column(String(10), nullable=False)
-    clase = relationship("clase_dictada", secondary=porfesor_x_clase)
+    # clase = relationship("clase_dictada", secondary=porfesor_x_clase)
 
-    def __init__(self, user, password) -> None:
-        self.user = user
-        self.password = password
+    def create_user(user, password, name, last_name, type_user):
+        with db.engie.connect() as connection:
+            connection.execute(
+                insert(Usuario).values(
+                    user=user,
+                    password=generate_password_hash(password),
+                    name=name,
+                    last_name=last_name,
+                    type=type_user,
+                )
+            )
+
+    def get_user(user):
+        response = db.session.query(Usuario).where(Usuario.user == user).first()
+        return response
+
+    # def __init__(self, user, password,name,last_name,type_user):
+    #     self.user = user
+    #     self.password = password
+    #     self.name = name
+    #     self.last_name = last_name
+    #     self.type = type_user
 
 
 class Curso(db.Base):
@@ -150,3 +174,5 @@ class Horario(db.Base):
 
 
 db.Base.metadata.create_all(db.engie)
+# Usuario.create_user(user="u3",password="123",name="pedro",last_name="lopez",type_user="estudiante")
+Usuario.get_user("uzsdg4")
