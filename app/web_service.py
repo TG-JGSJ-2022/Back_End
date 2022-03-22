@@ -9,7 +9,7 @@ from app.proxy_red_neuronal import red_neuronal
 from flask import flash, jsonify, request, flash, make_response
 from app import constants
 from flask_login import login_user, login_required, logout_user
-from flask_user import roles_required
+
 from app import login_manager
 from app.models import *
 from werkzeug.security import check_password_hash
@@ -46,7 +46,7 @@ def logout():
 
 
 @app.route("/recibir-imagen", methods=["POST"])
-@roles_required("estudiante")
+
 def ejempo_red_neuronal():
     """Funcion de ejemplo para el funcionaminto de la red neuronal
 
