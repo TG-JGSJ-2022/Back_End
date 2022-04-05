@@ -174,6 +174,6 @@ class Horario(db.Base):
     hora_fin = Column(Time)
 
 
-db.Base.metadata.create_all(db.engie)
-Usuario.create_user(user="u3",password="123",name="pedro",last_name="lopez",type_user="estudiante")
-print(Usuario.get_user("uzsdg4"))
+# db.Base.metadata.create_all(db.engie)
+# Usuario.create_user(user="u3",password="123",name="pedro",last_name="lopez",type_user="estudiante")
+# print(Usuario.get_user("uzsdg4"))
