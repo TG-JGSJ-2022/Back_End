@@ -1,8 +1,8 @@
 """En el siguiente scrip se va a encontrar los modelos de clases para ser mapeadas 
 en MySql con sqlalchemy 
 """
-# import app.db as db
-import db
+import app.db as db
+# import db
 from sqlalchemy import (
     Column,
     ForeignKey,
