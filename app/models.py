@@ -1,7 +1,8 @@
 """En el siguiente scrip se va a encontrar los modelos de clases para ser mapeadas 
 en MySql con sqlalchemy 
 """
-import app.db as db
+# import app.db as db
+import db
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -174,5 +175,5 @@ class Horario(db.Base):
 
 
 db.Base.metadata.create_all(db.engie)
-# Usuario.create_user(user="u3",password="123",name="pedro",last_name="lopez",type_user="estudiante")
-Usuario.get_user("uzsdg4")
+Usuario.create_user(user="u3",password="123",name="pedro",last_name="lopez",type_user="estudiante")
+print(Usuario.get_user("uzsdg4"))
