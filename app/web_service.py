@@ -1,4 +1,5 @@
 import base64
+from crypt import methods
 from pydoc import text
 import numpy as np
 import cv2
@@ -22,19 +23,20 @@ def load_user(user_name):
 
 @app.route("/login", methods=["POST"])
 def login():
-    req = request.json
-    user = Usuario.get_user(req["user"])
-    if user != None:
-        if check_password_hash(user.password, req["password"]):
-            login_user(user)
-            return make_response(
-                jsonify({'message':'usuario logeado formado'}),
-                200
-            )
-    return make_response(
-        jsonify({'message':'usuario mal formado'}),
-        400
-    )
+
+    req_username = request.json['user']
+    req_password = request.json['password']
+
+    user = Usuario.get_user(req_username)
+
+    if user == None: 
+        return make_response(jsonify('Usuario no existe'), 400)
+
+    if not check_password_hash(user.password, req_password):
+        return make_response(jsonify('contraseña incorrecta'), 403)
+    
+    login_user(user)
+    return make_response(jsonify('usuario logeado formado'), 200)
 
 
 @app.route("/logout", methods=["post"])
