@@ -1,3 +1,6 @@
 from app import app
+
 if __name__ == '__main__':
-    app.run("0.0.0.0",port=80)
+    
+    #app.run("25.1.186.127",port=8080)
+    app.run("localhost",port=8080)

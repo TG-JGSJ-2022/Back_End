@@ -1,6 +1,6 @@
 import requests
 from app import constants
-
+import json
 def red_neuronal(image)->dict():
     """
         esta funcion se encarga establecer el llamando 
@@ -12,8 +12,9 @@ def red_neuronal(image)->dict():
         dict: diccionario que contiene toda la 
             informacion de la respuesta
     """
+    imageS =image.decode("utf-8")
     body = {
-        "base64Image": image,
+        "base64Image": imageS,
         "nn_model":"InceptionV3"
     }
     response =  requests.post(constants.URL_RED_NEURONAL,json=body)
