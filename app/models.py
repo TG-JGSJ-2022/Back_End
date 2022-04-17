@@ -1,7 +1,7 @@
 """En el siguiente scrip se va a encontrar los modelos de clases para ser mapeadas 
 en MySql con sqlalchemy 
 """
-import db
+import app.db as db
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -45,7 +45,7 @@ class Usuario(db.Base):
     name = Column(String(20), nullable=False)
     last_name = Column(String(20), nullable=False)
     type = Column(String(10), nullable=False)
-    clase = relationship("clase_dictada", secondary=porfesor_x_clase)
+    #clase = relationship("clase_dictada", secondary=porfesor_x_clase)
 
     def __init__(self, user, password) -> None:
         self.user = user
@@ -132,6 +132,9 @@ class Emocion_x_Estudiante(db.Base):
     emocion_id = Column(Integer, ForeignKey("emocion.id"), primary_key=True)
     porcentaje = Column(Float)
 
+    def get_emocion_x_estudiante(sesion_id):
+        response = db.session.query(Emocion_x_Estudiante).where(Emocion_x_Estudiante.sesion_id == sesion_id).all()
+        return response
 
 class Horario(db.Base):
     """

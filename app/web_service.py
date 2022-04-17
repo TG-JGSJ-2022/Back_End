@@ -4,19 +4,19 @@ import cv2
 from math import ceil, floor 
 
 from app import app
+from app.models import Emocion_x_Estudiante
 from app.proxy_red_neuronal import red_neuronal
-from flask import request
+from flask import request, jsonify, make_response
+import json
 from app import  constants
-from app.models import savebyjson
 
 @app.route("/recibir-imagen", methods=['POST'])
-def ejempo_red_neuronal():
-    """Funcion de ejemplo para el funcionaminto de la red neuronal
+def proxy_red_neuronal():
+    """Funcion que utiliza la red neuronal
     
     Guardar:
         response: respuesta de la solicitud
     """
-    
     image_from_request = list(request.json.values())[0]
     
     nparr = np.fromstring(base64.b64decode(image_from_request), np.uint8)
@@ -24,19 +24,28 @@ def ejempo_red_neuronal():
 
     # Process image
     resized_image = image_resize_average_color(image)
-
     _, buffer = cv2.imencode(".png", resized_image)
 
     image_base64 = base64.b64encode(buffer)
-    
     resultado = red_neuronal(image_base64)
 
-    savebyjson(resultado)
+    print(resultado)
     
     return resultado
 
-
-
+@app.route("/resultado", methods=['GET'])
+def get_resultados():
+    
+    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(1)
+    list = []
+    dict = {}
+    for ex in resultado:
+        dict.update(ex.__dict__)
+        dict.pop('_sa_instance_state')
+        list.append(dict)
+        dict = {}
+    #TO DO... Timer and don't duplicate students count
+    return jsonify(list)
 
 ###
 def image_resize_average_color(image, width = 299, height = 299, inter = cv2.INTER_AREA):
