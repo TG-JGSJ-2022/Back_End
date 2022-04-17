@@ -37,12 +37,32 @@ def login():
     return make_response(jsonify('usuario logeado formado'), 200)
 
 
-@app.route("/logout", methods=["post"])
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
     flash("se ha cerrado sesion")
     return "cerrado"
+
+
+
+"""
+    NOTE: 
+        Teacher endpoints should go into a separate controller :)
+"""
+@app.route("/courses", methods=["GET"])
+def get_courses(): 
+
+    req_user = request.json['user']
+
+    if req_user == None: 
+        return make_response(jsonify('Unathorized request'), 403)
+
+    
+
+    return make_response({}, 200) 
+# Eod
+
 
 
 @app.route("/recibir-imagen", methods=["POST"])
@@ -94,7 +114,6 @@ def image_resize_average_color(image, width=299, height=299, inter=cv2.INTER_ARE
     average_color = [0, 0, 0]
     average = h * w
 
-    # Traverse image
     for i in range(0, h):
         for j in range(0, w):
             pixel = image[i][j]
@@ -124,6 +143,4 @@ def image_resize_average_color(image, width=299, height=299, inter=cv2.INTER_ARE
     #      Return resized image with padding
     # -------------------------------------------------
     return image_with_padding
-
-
 # Eod
