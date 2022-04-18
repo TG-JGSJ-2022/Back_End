@@ -51,7 +51,7 @@ def logout():
 
 @app.route("/recibir-imagen", methods=["POST"])
 @login_required
-def ejempo_red_neuronal():
+def end_point_nn():
     """Funcion de ejemplo para el funcionaminto de la red neuronal
 
     Guardar:
@@ -60,8 +60,10 @@ def ejempo_red_neuronal():
 
     user = Usuario.get_user(session["_user_id"])
     id_sesion_activa = user.get_actual_sesion_estudiante()
+    if user.type != "estudiante":
+        return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
-        return "error"
+        return make_response(jsonify("No hay sesion activa"), 400)
     image_from_request = list(request.json.values())[0]
 
     nparr = np.fromstring(base64.b64decode(image_from_request), np.uint8)
@@ -69,12 +71,27 @@ def ejempo_red_neuronal():
 
     # Process image
     resized_image = image_resize_average_color(image)
-
     _, buffer = cv2.imencode(".png", resized_image)
 
     image_base64 = base64.b64encode(buffer)
+    resultado = red_neuronal(image_base64)
     current_app.logger.info("Calculando emocion")
     resultado = red_neuronal(image_base64)
     Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,datetime.today(),resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     
     return resultado
+
+
+@app.route("/resultado", methods=['GET'])
+def get_resultados():
+    
+    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(1)
+    list = []
+    dict = {}
+    for ex in resultado:
+        dict.update(ex.__dict__)
+        dict.pop('_sa_instance_state')
+        list.append(dict)
+        dict = {}
+    #TO DO... Timer and don't duplicate students count
+    return jsonify(list)

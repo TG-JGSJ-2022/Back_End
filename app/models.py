@@ -55,8 +55,9 @@ class Usuario(UserMixin, db.Base):
     name = Column(String(20), nullable=False)
     last_name = Column(String(20), nullable=False)
     type = Column(String(10), nullable=False)
+    
     authenticated = Column(Boolean, default=False)
-    # clase = relationship("clase_dictada", secondary=porfesor_x_clase)
+   
     def is_active(self):
         """True, as all users are active."""
         return True
@@ -93,15 +94,6 @@ class Usuario(UserMixin, db.Base):
         return response
 
     def get_actual_sesion_estudiante(self):
-        dicicionario_dias = {
-            "Monday": "Lunes",
-            "Tuesday": "Martes",
-            "Wednesday": "Miercoles",
-            "Thursday": "Jueves",
-            "Friday": "Viernes",
-            "Saturday": "Sabado",
-            "Sunday": "Domingo",
-        }
         with db.engie.connect() as connection:
             result = connection.execute(
                 """select bd_tesis.sesion.id,bd_tesis.sesion.hora_inicio,bd_tesis.sesion.hora_fin,dia 
@@ -121,14 +113,6 @@ class Usuario(UserMixin, db.Base):
                 return row["id"]
                 
         return None
-
-    # def __init__(self, user, password,name,last_name,type_user):
-    #     self.user = user
-    #     self.password = password
-    #     self.name = name
-    #     self.last_name = last_name
-    #     self.type = type_user
-
 
 class Curso(db.Base):
     """
@@ -217,6 +201,9 @@ class Emocion_x_Estudiante(db.Base):
     emocion_id = Column(Integer, ForeignKey("emocion.id"), primary_key=True)
     porcentaje = Column(Float)
 
+    def get_emocion_x_estudiante(sesion_id):
+        response = db.session.query(Emocion_x_Estudiante).where(Emocion_x_Estudiante.sesion_id == sesion_id).all()
+        return response
     def insert_emocion_estudiante(estudiante_id,sesion_id,fecha,emocion,porcentaje):
         try:
             with db.engie.connect() as connection:
@@ -256,5 +243,5 @@ class Horario(db.Base):
 
 
 # db.Base.metadata.create_all(db.engie)
-# Usuario.create_user(user="u1",password="123",name="maria",last_name="laAmiguita",type_user="estudiante")
+# Usuario.create_user(user="p1",password="123",name="julian",last_name="builes",type_user="profesor")
 # print(Usuario.get_user("uzsdg4"))
