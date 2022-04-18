@@ -64,10 +64,33 @@ class Usuario(UserMixin, db.Base):
                     type=type_user,
                 )
             )
+    # Eod        
 
     def get_user(user):
         response = db.session.query(Usuario).where(Usuario.user == user).first()
         return response
+    # Eod
+
+    def get_teacher_courses(user_id):
+
+        query = """select * 
+                   from curso
+                   where id in (
+                       select curso_id 
+                       from clase 
+                       where id in (
+                           select clase_id 
+                           from profesorXclase, usuario 
+                           where profesorXclase.profesor_id = {} and usuario.id = {}
+                       )
+                   );""".format(user_id, user_id)
+
+        with db.engie.connect() as connection: 
+            result = connection.execute(query)
+        # Eow
+
+        return result.all()
+    # Eod
 
     # def __init__(self, user, password,name,last_name,type_user):
     #     self.user = user

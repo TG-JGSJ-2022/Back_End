@@ -54,13 +54,19 @@ def logout():
 def get_courses(): 
 
     req_user = request.json['user']
+    req_user_id = request.json['id']
 
     if req_user == None: 
         return make_response(jsonify('Unathorized request'), 403)
 
-    
+    teacher_courses = Usuario.get_teacher_courses(req_user_id)
+    response = []
+    for course in teacher_courses:
+        courseId = course._asdict().get('id')
+        courseName = course._asdict().get('nombre')
+        response.append({'courseCode': courseId, 'courseName': courseName})
 
-    return make_response({}, 200) 
+    return make_response(jsonify(response), 200) 
 # Eod
 
 
