@@ -190,7 +190,7 @@ class Sesion(db.Base):
             session.close()
         return response
     def get_sesiones_x_cursos(clase_id):
-        response = db.session.query(Sesion).where(Sesion.id == clase_id).all()
+        response = db.session.query(Sesion).where(Sesion.clase_id == clase_id).all()
         return response
 
 
