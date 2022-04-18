@@ -2,6 +2,8 @@
 en MySql con sqlalchemy 
 """
 from shutil import ExecError
+
+from requests import session
 import app.db as db
 from datetime import datetime
 from flask import current_app
@@ -144,6 +146,12 @@ class Clase(db.Base):
     cantidad_estudiantes = Column(Integer)
     curso_id = Column(Integer, ForeignKey("curso.id"))
 
+    def get_clase(id):
+        with db.Classs.begin() as classs:
+            response = classs.query(Classs).where(Classs.id == id).first()
+            classs.close()
+        return response
+
 
 class Emocion(db.Base):
     """
@@ -181,7 +189,9 @@ class Sesion(db.Base):
             response = session.query(Sesion).where(Sesion.id == id).first()
             session.close()
         return response
-    
+    def get_sesiones_x_cursos(clase_id):
+        response = db.session.query(Sesion).where(Sesion.id == clase_id).all()
+        return response
 
 
 class Emocion_x_Estudiante(db.Base):
