@@ -34,7 +34,10 @@ def login():
         return make_response(jsonify('contraseña incorrecta'), 403)
     
     login_user(user)
-    return make_response(jsonify('usuario logeado formado'), 200)
+
+    response_user = {'username': user.user, 'id': user.id}
+
+    return make_response(jsonify(response_user), 200)
 
 
 @app.route("/logout", methods=["POST"])
