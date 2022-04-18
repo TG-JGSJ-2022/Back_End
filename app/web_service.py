@@ -53,8 +53,8 @@ def logout():
 @app.route("/courses", methods=["GET"])
 def get_courses(): 
 
-    req_user = request.json['user']
-    req_user_id = request.json['id']
+    req_user = request.args.get('user')
+    req_user_id = request.args.get('id')
 
     if req_user == None: 
         return make_response(jsonify('Unathorized request'), 403)
