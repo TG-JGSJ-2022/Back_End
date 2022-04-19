@@ -37,7 +37,8 @@ def login():
     current_app.logger.info(f"Usuario {req_username} logueado")
     login_user(user)
 
-    response_user = {'username': user.user, 'id': user.id}
+    response_user = {'username': user.user, 'id': user.id,
+                     "rol":user.type}
 
     return make_response(jsonify(response_user), 200)
 # Eod
