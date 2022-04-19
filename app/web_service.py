@@ -87,7 +87,7 @@ def end_point_nn():
     """
 
     user = Usuario.get_user(session["_user_id"])
-    id_sesion_activa = user.get_actual_sesion_estudiante()
+    id_sesion_activa = 7 # user.get_actual_sesion_estudiante()
     if user.type != "estudiante":
         return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
@@ -104,7 +104,7 @@ def end_point_nn():
     image_base64 = base64.b64encode(buffer)
     resultado = red_neuronal(image_base64)
     current_app.logger.info("Calculando emocion")
-    resultado = red_neuronal(image_base64)
+    print(id_sesion_activa)
     Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,datetime.today(),resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     
     return resultado
@@ -114,13 +114,13 @@ def end_point_nn():
 @app.route("/resultado", methods=['GET'])
 def get_resultados():
     
-    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(1)
+    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
     list = []
-    dict = {}
     for ex in resultado:
-        dict.update(ex.__dict__)
-        dict.pop('_sa_instance_state')
-        list.append(dict)
-        dict = {}
-    #TO DO... Timer and don't duplicate students count
+        porcentaje = ex[4] * 100
+        info = { 'emocion_id' : ex[3], 'sesion_id' : ex[1], 'porcentaje': porcentaje, 'estudiante_id' : ex[0], 'fecha' : ex[2] }
+        list.append(info)
+        info = {}
+
+    #TO DO... don't duplicate students count
     return jsonify(list)

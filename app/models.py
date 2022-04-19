@@ -2,10 +2,10 @@
 en MySql con sqlalchemy 
 """
 from shutil import ExecError
-import app.db as db
-from datetime import datetime
+#import app.db as db
+from datetime import date, datetime
 from flask import current_app
-# import db
+import db
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -225,8 +225,27 @@ class Emocion_x_Estudiante(db.Base):
     porcentaje = Column(Float)
 
     def get_emocion_x_estudiante(sesion_id):
-        response = db.session.query(Emocion_x_Estudiante).where(Emocion_x_Estudiante.sesion_id == sesion_id).all()
-        return response
+        with db.engie.connect() as connection:
+            now = datetime.today()
+            time_d = 10
+            if now.second < time_d:             
+                seconds = now.second + (60 - time_d)
+                if now.minute == 0:
+                    minutes = now.minute + (60 - 1)
+                    hours = now.hour - 1
+                    previous = now.replace(second = seconds, minute= minutes, hour = hours)
+                minutes = now.minute - 1
+                previous = now.replace(second = seconds, minute= minutes)
+            else:
+                seconds = now.second - time_d
+                previous =now.replace(second = seconds)
+
+            respuesta = connection.execute("""
+                                SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = '{}' and bd_tesis.emocionXestudiante.fecha < '{}' and bd_tesis.emocionXestudiante.fecha > '{}';
+                            """.format(sesion_id, now, previous))
+            connection.close()
+        return respuesta.fetchall()
+
     def insert_emocion_estudiante(estudiante_id,sesion_id,fecha,emocion,porcentaje):
         try:
             with db.engie.connect() as connection:
@@ -265,6 +284,6 @@ class Horario(db.Base):
     hora_fin = Column(Time)
 
 
-# db.Base.metadata.create_all(db.engie)
-# Usuario.create_user(user="p1",password="123",name="julian",last_name="builes",type_user="profesor")
-# print(Usuario.get_user("uzsdg4"))
+#db.Base.metadata.create_all(db.engie)
+Usuario.create_user(user="simondavila",password="Banfield2019",name="Simon",last_name="Davila",type_user="estudiante")
+#print(Usuario.get_user("uzsdg4"))
