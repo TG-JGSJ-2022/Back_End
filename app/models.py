@@ -1,7 +1,10 @@
 """En el siguiente scrip se va a encontrar los modelos de clases para ser mapeadas 
 en MySql con sqlalchemy 
 """
+from shutil import ExecError
 import app.db as db
+from datetime import datetime
+from flask import current_app
 # import db
 from sqlalchemy import (
     Column,
@@ -13,6 +16,7 @@ from sqlalchemy import (
     Float,
     Time,
     Date,
+    Boolean,
     insert,
     select,
 )
@@ -51,7 +55,24 @@ class Usuario(UserMixin, db.Base):
     name = Column(String(20), nullable=False)
     last_name = Column(String(20), nullable=False)
     type = Column(String(10), nullable=False)
-    # clase = relationship("clase_dictada", secondary=porfesor_x_clase)
+    
+    authenticated = Column(Boolean, default=False)
+   
+    def is_active(self):
+        """True, as all users are active."""
+        return True
+
+    def get_id(self):
+        """Return the email address to satisfy Flask-Login's requirements."""
+        return self.user
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
+    def is_anonymous(self):
+        """False, as anonymous users aren't supported."""
+        return False
 
     def create_user(user, password, name, last_name, type_user):
         with db.engie.connect() as connection:
@@ -64,10 +85,13 @@ class Usuario(UserMixin, db.Base):
                     type=type_user,
                 )
             )
-    # Eod        
+            connection.close()
+            
 
     def get_user(user):
-        response = db.session.query(Usuario).where(Usuario.user == user).first()
+        with db.Session.begin() as session:
+            response = session.query(Usuario).where(Usuario.user == user).first()
+            session.close()
         return response
     # Eod
 
@@ -92,13 +116,26 @@ class Usuario(UserMixin, db.Base):
         return result.all()
     # Eod
 
-    # def __init__(self, user, password,name,last_name,type_user):
-    #     self.user = user
-    #     self.password = password
-    #     self.name = name
-    #     self.last_name = last_name
-    #     self.type = type_user
-
+    def get_actual_sesion_estudiante(self):
+        with db.engie.connect() as connection:
+            result = connection.execute(
+                """select bd_tesis.sesion.id,bd_tesis.sesion.hora_inicio,bd_tesis.sesion.hora_fin,dia 
+                from bd_tesis.estudianteXclase,bd_tesis.clase,bd_tesis.horario,bd_tesis.sesion 
+                where
+                bd_tesis.estudianteXclase.estudiante_id = {} and 
+                bd_tesis.clase.id = bd_tesis.estudianteXclase.clase_id and 
+                bd_tesis.horario.clase_id =  bd_tesis.clase.id and
+                bd_tesis.sesion.clase_id = bd_tesis.clase.id;""".format(
+                    self.id
+                )
+            )
+        # today = datetime.today()
+        today = datetime(2022, 1, 28, 14,30)
+        for row in result.fetchall():
+            if row["hora_inicio"] <  today < row["hora_fin"]:
+                return row["id"]
+                
+        return None
 
 class Curso(db.Base):
     """
@@ -161,6 +198,13 @@ class Sesion(db.Base):
     hora_inicio = Column(DateTime, nullable=False)
     hora_fin = Column(DateTime, nullable=False)
     clase_id = Column(Integer, ForeignKey("clase.id"))
+    
+    def get_sesion(id):
+        with db.Session.begin() as session:
+            response = session.query(Sesion).where(Sesion.id == id).first()
+            session.close()
+        return response
+    
 
 
 class Emocion_x_Estudiante(db.Base):
@@ -180,6 +224,30 @@ class Emocion_x_Estudiante(db.Base):
     emocion_id = Column(Integer, ForeignKey("emocion.id"), primary_key=True)
     porcentaje = Column(Float)
 
+    def get_emocion_x_estudiante(sesion_id):
+        response = db.session.query(Emocion_x_Estudiante).where(Emocion_x_Estudiante.sesion_id == sesion_id).all()
+        return response
+    def insert_emocion_estudiante(estudiante_id,sesion_id,fecha,emocion,porcentaje):
+        try:
+            with db.engie.connect() as connection:
+                respuesta = connection.execute(""" 
+                                select id 
+                                from bd_tesis.emocion where emocion.nombre = '{}';
+                                """.format(emocion))
+                emocion_id = respuesta.fetchone()["id"]
+                connection.execute(
+                    insert(Emocion_x_Estudiante).values(
+                        estudiante_id=estudiante_id,
+                        sesion_id=sesion_id,
+                        fecha=fecha,
+                        emocion_id=emocion_id,
+                        porcentaje=porcentaje,
+                    )
+                )
+                connection.close()
+        except Exception as err:
+            current_app.logger.error("Error en guardar la emocion del estudiante")
+            
 
 class Horario(db.Base):
     """
@@ -198,5 +266,5 @@ class Horario(db.Base):
 
 
 # db.Base.metadata.create_all(db.engie)
-# Usuario.create_user(user="u3",password="123",name="pedro",last_name="lopez",type_user="estudiante")
+# Usuario.create_user(user="p1",password="123",name="julian",last_name="builes",type_user="profesor")
 # print(Usuario.get_user("uzsdg4"))
