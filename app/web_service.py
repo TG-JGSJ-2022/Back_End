@@ -38,7 +38,7 @@ def login():
     response_user = {'username': user.user, 'id': user.id}
 
     return make_response(jsonify(response_user), 200)
-
+# Eod
 
 @app.route("/logout", methods=["POST"])
 @login_required
