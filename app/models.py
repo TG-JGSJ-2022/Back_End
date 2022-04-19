@@ -86,12 +86,35 @@ class Usuario(UserMixin, db.Base):
                 )
             )
             connection.close()
+            
 
     def get_user(user):
         with db.Session.begin() as session:
             response = session.query(Usuario).where(Usuario.user == user).first()
             session.close()
         return response
+    # Eod
+
+    def get_teacher_courses(user_id):
+
+        query = """select * 
+                   from curso
+                   where id in (
+                       select curso_id 
+                       from clase 
+                       where id in (
+                           select clase_id 
+                           from profesorXclase, usuario 
+                           where profesorXclase.profesor_id = {} and usuario.id = {}
+                       )
+                   );""".format(user_id, user_id)
+
+        with db.engie.connect() as connection: 
+            result = connection.execute(query)
+        # Eow
+
+        return result.all()
+    # Eod
 
     def get_actual_sesion_estudiante(self):
         with db.engie.connect() as connection:

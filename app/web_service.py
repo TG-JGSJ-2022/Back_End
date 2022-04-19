@@ -36,17 +36,46 @@ def login():
         return make_response(jsonify("contraseña incorrecta"), 403)
     current_app.logger.info(f"Usuario {req_username} logueado")
     login_user(user)
-    # print("usuario loggeado")
-    return make_response(jsonify("usuario logueado formado"), 200)
 
+    response_user = {'username': user.user, 'id': user.id,
+                     "rol":user.type}
 
-@app.route("/logout", methods=["post"])
+    return make_response(jsonify(response_user), 200)
+# Eod
+
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
     current_app.logger.info("Usuario {} deslogueado logueado".format(session["_user_id"]))
     flash("se ha cerrado sesion")
     return "cerrado"
+
+
+
+"""
+    NOTE: 
+        Teacher endpoints should go into a separate controller :)
+"""
+@app.route("/courses", methods=["GET"])
+def get_courses(): 
+
+    req_user = request.args.get('user')
+    req_user_id = request.args.get('id')
+
+    if req_user == None: 
+        return make_response(jsonify('Unathorized request'), 403)
+
+    teacher_courses = Usuario.get_teacher_courses(req_user_id)
+    response = []
+    for course in teacher_courses:
+        courseId = course._asdict().get('id')
+        courseName = course._asdict().get('nombre')
+        response.append({'courseCode': courseId, 'courseName': courseName})
+
+    return make_response(jsonify(response), 200) 
+# Eod
+
 
 
 @app.route("/recibir-imagen", methods=["POST"])
@@ -82,6 +111,7 @@ def end_point_nn():
     return resultado
 
 
+    
 @app.route("/resultado", methods=['GET'])
 def get_resultados():
     
