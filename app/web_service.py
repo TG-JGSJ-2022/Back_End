@@ -1,5 +1,6 @@
 import base64
 import imp
+import json
 import numpy as np
 import cv2
 
@@ -93,9 +94,9 @@ def end_point_nn():
         return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
         return make_response(jsonify("No hay sesion activa"), 400)
-    image_from_request = list(request.json.values())[0]
+    re = list(request.json.values())
 
-    nparr = np.fromstring(base64.b64decode(image_from_request), np.uint8)
+    nparr = np.fromstring(base64.b64decode(re[0]), np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     # Process image
@@ -105,17 +106,47 @@ def end_point_nn():
     image_base64 = base64.b64encode(buffer)
     resultado = red_neuronal(image_base64)
     current_app.logger.info("Calculando emocion")
-    print(id_sesion_activa)
-    Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,datetime.today(),resultado["data"]["prediction"],resultado["data"]["label_confidence"])
-    
+    today = datetime.strptime(re[1], '%d/%m/%Y, %H:%M:%S')
+    Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     return resultado
+
+@app.route("/info_sesion",methods=["GET"])
+# @login_required
+def obtener_info_sesion():
+    id = request.args.get('id')
+    print(id)
+    try:
+        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(7)
+        print(len(resultado))
+        if len(resultado) == 0:
+            return make_response(jsonify({"error":"no data"}),400)
+        horas =  set()
+        data = []
+        for r in resultado:
+            d = {}
+            d["nombre"] = r["name"]
+            d["apellido"]  = r["last_name"]
+            d["emocion"] = r["nombre"]
+            d["fecha"] =  str(r["fecha"])
+            horas.add(str(r["fecha"]))
+            data.append(d)
+        response = {
+            "dates" : list(horas),
+            "data":data
+        }
+        print("llega")
+        return make_response(jsonify(response), 200) 
+    except Exception as err:
+        return make_response(jsonify({"error":f"{err}"}),400)
 
 
     
 @app.route("/resultado", methods=['GET'])
+@login_required
 def get_resultados():
     
     resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
+    print(resultado)
     list = []
     for ex in resultado:
         porcentaje = ex[4] * 100

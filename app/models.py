@@ -2,10 +2,10 @@
 en MySql con sqlalchemy 
 """
 from shutil import ExecError
-#import app.db as db
-from datetime import date, datetime
+import app.db as db
+from datetime import date, datetime, timedelta
 from flask import current_app
-import db
+#import db
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -227,26 +227,31 @@ class Emocion_x_Estudiante(db.Base):
     def get_emocion_x_estudiante(sesion_id):
         with db.engie.connect() as connection:
             now = datetime.today()
-            time_d = 10
-            if now.second < time_d:             
-                seconds = now.second + (60 - time_d)
-                if now.minute == 0:
-                    minutes = now.minute + (60 - 1)
-                    hours = now.hour - 1
-                    previous = now.replace(second = seconds, minute= minutes, hour = hours)
-                minutes = now.minute - 1
-                previous = now.replace(second = seconds, minute= minutes)
-            else:
-                seconds = now.second - time_d
-                previous =now.replace(second = seconds)
-
+            # time_d = 10
+            # if now.second < time_d:             
+            #     seconds = now.second + (60 - time_d)
+            #     if now.minute == 0:
+            #         minutes = now.minute + (60 - 1)
+            #         hours = now.hour - 1
+            #         previous = now.replace(second = seconds, minute= minutes, hour = hours)
+            #     minutes = now.minute - 1
+            #     previous = now.replace(second = seconds, minute= minutes)
+            # else:
+            #     seconds = now.second - time_d
+            #     previous =now.replace(second = seconds)
+            second_before = int(str(now.second)[0]+"0")
+            second_after = int(str(now.second)[0]+"0") + 10
+            before = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_before)
+            previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_after-1)
             respuesta = connection.execute("""
-                                SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = '{}' and bd_tesis.emocionXestudiante.fecha < '{}' and bd_tesis.emocionXestudiante.fecha > '{}';
-                            """.format(sesion_id, now, previous))
+                                           SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = {} and (bd_tesis.emocionXestudiante.fecha between '{}' and '{}');
+                            """.format(sesion_id, before - timedelta(seconds=10), previous -timedelta(seconds=10)))
             connection.close()
         return respuesta.fetchall()
 
     def insert_emocion_estudiante(estudiante_id,sesion_id,fecha,emocion,porcentaje):
+        second = int(str(fecha.second)[0]+"0")
+        new_fecha =datetime(year=fecha.year,month=fecha.month,day=fecha.day,hour=fecha.hour,minute=fecha.minute, second=second)
         try:
             with db.engie.connect() as connection:
                 respuesta = connection.execute(""" 
@@ -266,6 +271,19 @@ class Emocion_x_Estudiante(db.Base):
                 connection.close()
         except Exception as err:
             current_app.logger.error("Error en guardar la emocion del estudiante")
+    def get_emocions_for_sesion(sesion_id):
+        try:
+            with db.engie.connect() as connection:
+                respuesta =  connection.execute("""
+                                                select  bd_tesis.usuario.name,  bd_tesis.usuario.last_name,bd_tesis.emocion.nombre,bd_tesis.emocionXestudiante.fecha  
+                                                from bd_tesis.emocionXestudiante,bd_tesis.emocion,bd_tesis.usuario 
+                                                where 
+                                                bd_tesis.emocionXestudiante.sesion_id = {} and 
+                                                bd_tesis.emocionXestudiante.estudiante_id = bd_tesis.usuario.id and 
+                                                bd_tesis.emocionXestudiante.emocion_id = bd_tesis.emocion.id ;""".format(sesion_id))
+            return respuesta.fetchall()
+        except Exception as err:
+            current_app.logger.error("Error al traer los datos")
             
 
 class Horario(db.Base):
@@ -285,5 +303,5 @@ class Horario(db.Base):
 
 
 #db.Base.metadata.create_all(db.engie)
-Usuario.create_user(user="simondavila",password="Banfield2019",name="Simon",last_name="Davila",type_user="estudiante")
-#print(Usuario.get_user("uzsdg4"))
+# Usuario.create_user(user="simondavila",password="Banfield2019",name="Simon",last_name="Davila",type_user="estudiante")
+# #print(Usuario.get_user("uzsdg4"))
