@@ -1,6 +1,8 @@
 import base64
 import imp
 import json
+from logging import error
+from time import strptime
 import numpy as np
 import cv2
 
@@ -114,10 +116,10 @@ def end_point_nn():
 # @login_required
 def obtener_info_sesion():
     id = request.args.get('id')
-    print(id)
+    
     try:
         resultado = Emocion_x_Estudiante.get_emocions_for_sesion(7)
-        print(len(resultado))
+        current_app.logger.info(f"solicitud de sesion {id}")
         if len(resultado) == 0:
             return make_response(jsonify({"error":"no data"}),400)
         horas =  set()
@@ -130,19 +132,23 @@ def obtener_info_sesion():
             d["fecha"] =  str(r["fecha"])
             horas.add(str(r["fecha"]))
             data.append(d)
+        horas = list(horas)
+        horas.sort(key= lambda date: datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
+        
         response = {
-            "dates" : list(horas),
+            "dates" : horas,
             "data":data
         }
-        print("llega")
+        
         return make_response(jsonify(response), 200) 
     except Exception as err:
+        print(error)
         return make_response(jsonify({"error":f"{err}"}),400)
 
 
     
 @app.route("/resultado", methods=['GET'])
-@login_required
+# @login_required
 def get_resultados():
     
     resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
