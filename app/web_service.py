@@ -1,5 +1,8 @@
 import base64
 import imp
+import json
+from logging import error
+from time import strptime
 import numpy as np
 import cv2
 
@@ -46,8 +49,8 @@ def login():
 @app.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    logout_user()
     current_app.logger.info("Usuario {} deslogueado logueado".format(session["_user_id"]))
+    logout_user()
     flash("se ha cerrado sesion")
     return "cerrado"
 
@@ -88,14 +91,14 @@ def end_point_nn():
     """
 
     user = Usuario.get_user(session["_user_id"])
-    id_sesion_activa = user.get_actual_sesion_estudiante()
+    id_sesion_activa = 7 # user.get_actual_sesion_estudiante()
     if user.type != "estudiante":
         return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
         return make_response(jsonify("No hay sesion activa"), 400)
-    image_from_request = list(request.json.values())[0]
+    re = list(request.json.values())
 
-    nparr = np.fromstring(base64.b64decode(image_from_request), np.uint8)
+    nparr = np.fromstring(base64.b64decode(re[0]), np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     # Process image
@@ -105,23 +108,63 @@ def end_point_nn():
     image_base64 = base64.b64encode(buffer)
     resultado = red_neuronal(image_base64)
     current_app.logger.info("Calculando emocion")
-    resultado = red_neuronal(image_base64)
-    Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,datetime.today(),resultado["data"]["prediction"],resultado["data"]["label_confidence"])
-    
+    today = datetime.strptime(re[1], '%d/%m/%Y, %H:%M:%S')
+    Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     return resultado
+
+@app.route("/info_sesion",methods=["GET"])
+# @login_required
+def obtener_info_sesion():
+    id = request.args.get('id')
+    
+    try:
+        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(7)
+        current_app.logger.info(f"solicitud de sesion {id}")
+        if len(resultado) == 0:
+            return make_response(jsonify({"error":"no data"}),400)
+        horas =  set()
+        estudiantes = set()
+        data = []
+        for r in resultado:
+            d = {}
+            d["nombre"] = r["name"] + " "+ r["last_name"]
+            
+            estudiantes.add(
+                d["nombre"]
+            )
+            d["emocion"] = r["nombre"]
+            d["fecha"] =  str(r["fecha"])
+            horas.add(str(r["fecha"]))
+            
+            data.append(d)
+        horas = list(horas)
+        horas.sort(key= lambda date: datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
+        print(estudiantes)
+        response = {
+            "dates" : horas,
+            "data":data,
+            "students": list(estudiantes)
+        }
+        
+        return make_response(jsonify(response), 200) 
+    except Exception as err:
+        print("error: ",err)
+        return make_response(jsonify({"error":f"{err}"}),400)
 
 
     
 @app.route("/resultado", methods=['GET'])
+# @login_required
 def get_resultados():
     
-    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(1)
+    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
+    print(resultado)
     list = []
-    dict = {}
     for ex in resultado:
-        dict.update(ex.__dict__)
-        dict.pop('_sa_instance_state')
-        list.append(dict)
-        dict = {}
-    #TO DO... Timer and don't duplicate students count
+        porcentaje = ex[4] * 100
+        info = { 'emocion_id' : ex[3], 'sesion_id' : ex[1], 'porcentaje': porcentaje, 'estudiante_id' : ex[0], 'fecha' : ex[2] }
+        list.append(info)
+        info = {}
+
+    #TO DO... don't duplicate students count
     return jsonify(list)
