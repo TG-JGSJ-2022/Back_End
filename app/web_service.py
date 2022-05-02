@@ -49,8 +49,8 @@ def login():
 @app.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    logout_user()
     current_app.logger.info("Usuario {} deslogueado logueado".format(session["_user_id"]))
+    logout_user()
     flash("se ha cerrado sesion")
     return "cerrado"
 
@@ -123,26 +123,32 @@ def obtener_info_sesion():
         if len(resultado) == 0:
             return make_response(jsonify({"error":"no data"}),400)
         horas =  set()
+        estudiantes = set()
         data = []
         for r in resultado:
             d = {}
-            d["nombre"] = r["name"]
-            d["apellido"]  = r["last_name"]
+            d["nombre"] = r["name"] + " "+ r["last_name"]
+            
+            estudiantes.add(
+                d["nombre"]
+            )
             d["emocion"] = r["nombre"]
             d["fecha"] =  str(r["fecha"])
             horas.add(str(r["fecha"]))
+            
             data.append(d)
         horas = list(horas)
         horas.sort(key= lambda date: datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
-        
+        print(estudiantes)
         response = {
             "dates" : horas,
-            "data":data
+            "data":data,
+            "students": list(estudiantes)
         }
         
         return make_response(jsonify(response), 200) 
     except Exception as err:
-        print(error)
+        print("error: ",err)
         return make_response(jsonify({"error":f"{err}"}),400)
 
 
