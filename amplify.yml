@@ -10,7 +10,7 @@ frontend:
         - flask run
   artifacts:
     # IMPORTANT - Please verify your build output directory
-    baseDirectory: /
+    baseDirectory: ./
     files:
       - '**/*'
   cache:
