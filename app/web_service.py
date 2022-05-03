@@ -110,6 +110,8 @@ def end_point_nn():
     resultado = red_neuronal(image_base64)
     current_app.logger.info("Calculando emocion")
     today = datetime.strptime(re[1], '%d/%m/%Y, %H:%M:%S')
+    print("RE: ", re[1])
+    print("today: ", today)
     Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     return resultado
 
@@ -161,14 +163,20 @@ def get_resultados():
     user = Usuario.get_user(session["_user_id"])
     id_sesion_activa = user.get_actual_sesion_profesor()
     print("sesion_activa: " , id_sesion_activa)
-    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(id_sesion_activa)
-    print("resultado: ", resultado)
     list = []
-    for ex in resultado:
-        porcentaje = ex[4] * 100
-        info = { 'emocion_id' : ex[3], 'sesion_id' : ex[1], 'porcentaje': porcentaje, 'estudiante_id' : ex[0], 'fecha' : ex[2] }
+    if id_sesion_activa == None:
+        print("NONE")
+        resultado = "No hay sesions activas"
+        info = {'status': 1}
         list.append(info)
-        info = {}
-
+    else:
+        resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(id_sesion_activa)        
+        for ex in resultado:
+            porcentaje = ex[4] * 100
+            info = { 'emocion_id' : ex[3], 'sesion_id' : ex[1], 'porcentaje': porcentaje, 'estudiante_id' : ex[0], 'fecha' : ex[2], 'status' : 0 }
+            list.append(info)
+            info = {}
+    print("List: ", list)
+    print("resultado: ", resultado)
     #TO DO... don't duplicate students count
     return jsonify(list)
