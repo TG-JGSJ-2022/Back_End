@@ -92,6 +92,7 @@ def end_point_nn():
 
     user = Usuario.get_user(session["_user_id"])
     id_sesion_activa = user.get_actual_sesion_estudiante()
+    print(id_sesion_activa)
     if user.type != "estudiante":
         return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
@@ -156,8 +157,10 @@ def obtener_info_sesion():
 @app.route("/resultado", methods=['GET'])
 @login_required
 def get_resultados():
-    
-    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
+    user = Usuario.get_user(session["_user_id"])
+    id_sesion_activa = user.get_actual_sesion_profesor()
+    print(id_sesion_activa)
+    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(id_sesion_activa)
     print(resultado)
     list = []
     for ex in resultado:

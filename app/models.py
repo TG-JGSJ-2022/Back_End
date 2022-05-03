@@ -129,8 +129,27 @@ class Usuario(UserMixin, db.Base):
                     self.id
                 )
             )
-        # today = datetime.today()
-        today = datetime(2022, 1, 28, 14,30)
+        today = datetime.today()
+        for row in result.fetchall():
+            if row["hora_inicio"] <  today < row["hora_fin"]:
+                return row["id"]
+                
+        return None
+    def get_actual_sesion_profesor(self):
+        with db.engie.connect() as connection:
+            print(self.id)
+            result = connection.execute(
+                """select bd_tesis.sesion.id,bd_tesis.sesion.hora_inicio,bd_tesis.sesion.hora_fin,dia 
+                from bd_tesis.profesorXclase,bd_tesis.clase,bd_tesis.horario,bd_tesis.sesion 
+                where bd_tesis.profesorXclase.profesor_id = {} and 
+                bd_tesis.clase.id = bd_tesis.profesorXclase.clase_id and 
+                bd_tesis.horario.clase_id =  bd_tesis.clase.id and
+                bd_tesis.sesion.clase_id = bd_tesis.clase.id;
+                """.format(
+                    self.id
+                )
+            )
+        today = datetime.today()
         for row in result.fetchall():
             if row["hora_inicio"] <  today < row["hora_fin"]:
                 return row["id"]
