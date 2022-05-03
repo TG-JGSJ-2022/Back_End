@@ -113,7 +113,7 @@ def end_point_nn():
     return resultado
 
 @app.route("/info_sesion",methods=["GET"])
-# @login_required
+@login_required
 def obtener_info_sesion():
     id = request.args.get('id')
     
@@ -154,7 +154,7 @@ def obtener_info_sesion():
 
     
 @app.route("/resultado", methods=['GET'])
-# @login_required
+@login_required
 def get_resultados():
     
     resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
