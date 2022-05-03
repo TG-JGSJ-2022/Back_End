@@ -91,7 +91,7 @@ def end_point_nn():
     """
 
     user = Usuario.get_user(session["_user_id"])
-    id_sesion_activa = 7 # user.get_actual_sesion_estudiante()
+    id_sesion_activa = user.get_actual_sesion_estudiante()
     if user.type != "estudiante":
         return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
