@@ -137,7 +137,7 @@ class Usuario(UserMixin, db.Base):
         return None
     def get_actual_sesion_profesor(self):
         with db.engie.connect() as connection:
-            print(self.id)
+            print("id profesor: ", self.id)
             result = connection.execute(
                 """select bd_tesis.sesion.id,bd_tesis.sesion.hora_inicio,bd_tesis.sesion.hora_fin,dia 
                 from bd_tesis.profesorXclase,bd_tesis.clase,bd_tesis.horario,bd_tesis.sesion 
@@ -258,10 +258,18 @@ class Emocion_x_Estudiante(db.Base):
             # else:
             #     seconds = now.second - time_d
             #     previous =now.replace(second = seconds)
-            second_before = int(str(now.second)[0]+"0")
-            second_after = int(str(now.second)[0]+"0") + 10
+            
+            if(now.second > 9):
+                second_before = int(str(now.second)[0]+"0")
+                second_after = int(str(now.second)[0]+"0") + 10
+            else:
+                second_before = 0
+                second_after = 10
             before = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_before)
-            previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_after-1)
+            if second_after != 60:
+                previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_after)
+            else:
+                previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute+1, second=0)
             respuesta = connection.execute("""
                                            SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = {} and (bd_tesis.emocionXestudiante.fecha between '{}' and '{}');
                             """.format(sesion_id, before - timedelta(seconds=10), previous -timedelta(seconds=10)))
@@ -269,7 +277,10 @@ class Emocion_x_Estudiante(db.Base):
         return respuesta.fetchall()
 
     def insert_emocion_estudiante(estudiante_id,sesion_id,fecha,emocion,porcentaje):
-        second = int(str(fecha.second)[0]+"0")
+        if(fecha.second > 9):
+            second = int(str(fecha.second)[0]+"0")
+        else:
+            second = 0
         new_fecha =datetime(year=fecha.year,month=fecha.month,day=fecha.day,hour=fecha.hour,minute=fecha.minute, second=second)
         try:
             with db.engie.connect() as connection:
@@ -282,7 +293,7 @@ class Emocion_x_Estudiante(db.Base):
                     insert(Emocion_x_Estudiante).values(
                         estudiante_id=estudiante_id,
                         sesion_id=sesion_id,
-                        fecha=fecha,
+                        fecha=new_fecha,
                         emocion_id=emocion_id,
                         porcentaje=porcentaje,
                     )
