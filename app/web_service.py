@@ -91,7 +91,8 @@ def end_point_nn():
     """
 
     user = Usuario.get_user(session["_user_id"])
-    id_sesion_activa = 7 # user.get_actual_sesion_estudiante()
+    id_sesion_activa = user.get_actual_sesion_estudiante()
+    print("nn", id_sesion_activa)
     if user.type != "estudiante":
         return make_response(jsonify("Acceso denegado"), 403)
     if id_sesion_activa ==  None:
@@ -113,12 +114,13 @@ def end_point_nn():
     return resultado
 
 @app.route("/info_sesion",methods=["GET"])
-# @login_required
+@login_required
 def obtener_info_sesion():
     id = request.args.get('id')
     
     try:
-        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(7)
+        #La sesión la envía el historial.
+        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(10)
         current_app.logger.info(f"solicitud de sesion {id}")
         if len(resultado) == 0:
             return make_response(jsonify({"error":"no data"}),400)
@@ -139,7 +141,7 @@ def obtener_info_sesion():
             data.append(d)
         horas = list(horas)
         horas.sort(key= lambda date: datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
-        print(estudiantes)
+        print("estudiantes" , estudiantes)
         response = {
             "dates" : horas,
             "data":data,
@@ -154,11 +156,13 @@ def obtener_info_sesion():
 
     
 @app.route("/resultado", methods=['GET'])
-# @login_required
+@login_required
 def get_resultados():
-    
-    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(7)
-    print(resultado)
+    user = Usuario.get_user(session["_user_id"])
+    id_sesion_activa = user.get_actual_sesion_profesor()
+    print("sesion_activa: " , id_sesion_activa)
+    resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(id_sesion_activa)
+    print("resultado: ", resultado)
     list = []
     for ex in resultado:
         porcentaje = ex[4] * 100
