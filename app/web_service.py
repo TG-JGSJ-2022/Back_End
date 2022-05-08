@@ -1,8 +1,10 @@
 import base64
+from crypt import methods
 import imp
 import json
 from logging import error
 from time import strptime
+from flask_cors import cross_origin
 import numpy as np
 import cv2
 
@@ -79,6 +81,27 @@ def get_courses():
     return make_response(jsonify(response), 200) 
 # Eod
 
+@app.route("/course-sessions", methods=["GET"])
+def get_course_sessions():
+    req_user = request.args.get('user')
+    req_course_id = request.args.get('courseId')
+
+    if req_user == None: 
+        return make_response(jsonify('Unathorized request'), 403)
+
+    course_sessions = Usuario.get_course_sessions(req_course_id)
+
+    response = []
+    for session in course_sessions:
+        class_number = session._asdict().get('clase_id')
+        session_date = datetime.strftime(session._asdict().get('hora_inicio'), '%d/%b/%Y')
+        state = 'Finalizado'
+        session_id = session._asdict().get('sesion_id')
+        response.append({"clase": class_number, "fecha": session_date, "estado": state, "id": session_id})
+    # Eof
+
+    return make_response(jsonify(response))
+# Eod
 
 
 @app.route("/recibir-imagen", methods=["POST"])
@@ -109,7 +132,7 @@ def end_point_nn():
     image_base64 = base64.b64encode(buffer)
     resultado = red_neuronal(image_base64)
     current_app.logger.info("Calculando emocion")
-    today = datetime.strptime(re[1], '%d/%m/%Y, %H:%M:%S')
+    today = datetime.strptime(re[1], '%m/%d/%Y, %I:%M:%S %p')
     Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     return resultado
 

@@ -135,6 +135,19 @@ class Usuario(UserMixin, db.Base):
                 return row["id"]
                 
         return None
+    # Eod
+
+    def get_course_sessions(course_id): 
+        query = """SELECT clase.id AS clase_id, sesion.hora_inicio, sesion.hora_fin, sesion.id AS sesion_id
+                   FROM clase, curso, sesion
+                   WHERE clase.curso_id = 3194 AND curso.id = clase.curso_id AND sesion.clase_id = clase.id;""".format(course_id)
+
+        with db.engie.connect() as connection: 
+            result = connection.execute(query)
+        # Eow
+        return result.all() 
+    # Eod
+
     def get_actual_sesion_profesor(self):
         with db.engie.connect() as connection:
             print("id profesor: ", self.id)
