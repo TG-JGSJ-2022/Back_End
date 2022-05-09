@@ -51,7 +51,7 @@ def logout():
     current_app.logger.info("Usuario {} deslogueado logueado".format(session["_user_id"]))
     logout_user()
     flash("se ha cerrado sesion")
-    return "cerrado"
+    return make_response(jsonify({"respuesta":"cerrado"}),200)
 
 
 
@@ -133,7 +133,7 @@ def end_point_nn():
     print("RE: ", re[1])
     print("today: ", today)
     Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
-    return resultado
+    return make_response(jsonify(resultado),200)
 
 @app.route("/info_sesion",methods=["GET"])
 @login_required
