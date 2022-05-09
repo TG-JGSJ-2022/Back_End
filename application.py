@@ -1,6 +1,6 @@
-from app import app
+from app import application
 
 if __name__ == '__main__':
-    app.debug = False
+    application.debug = False
     #app.run("25.1.186.127",port=5000)
-    app.run("localhost",port=5000,debug=True)
+    application.run("localhost",port=5000,debug=True)

@@ -15,7 +15,7 @@ from app import login_manager
 from app.models import *
 from werkzeug.security import check_password_hash
 
-from app import app
+from app import application
 from services.reszie_imge import image_resize_average_color
 
 
@@ -23,10 +23,10 @@ from services.reszie_imge import image_resize_average_color
 def load_user(user_name):
     return Usuario.get_user(user_name)
 
-@app.route("")
+@application.route("/")
 def inicio():
     return "hola"
-@app.route("/login", methods=["POST"])
+@application.route("/login", methods=["POST"])
 def login():
 
     req_username = request.json["user"]
@@ -47,7 +47,7 @@ def login():
     return make_response(jsonify(response_user), 200)
 # Eod
 
-@app.route("/logout", methods=["POST"])
+@application.route("/logout", methods=["POST"])
 @login_required
 def logout():
     current_app.logger.info("Usuario {} deslogueado logueado".format(session["_user_id"]))
@@ -61,7 +61,7 @@ def logout():
     NOTE: 
         Teacher endpoints should go into a separate controller :)
 """
-@app.route("/courses", methods=["GET"])
+@application.route("/courses", methods=["GET"])
 def get_courses(): 
 
     req_user = request.args.get('user')
@@ -80,7 +80,7 @@ def get_courses():
     return make_response(jsonify(response), 200) 
 # Eod
 
-@app.route("/course-sessions", methods=["GET"])
+@application.route("/course-sessions", methods=["GET"])
 def get_course_sessions():
     req_user = request.args.get('user')
     req_course_id = request.args.get('courseId')
@@ -103,7 +103,7 @@ def get_course_sessions():
 # Eod
 
 
-@app.route("/recibir-imagen", methods=["POST"])
+@application.route("/recibir-imagen", methods=["POST"])
 @login_required
 def end_point_nn():
     """Funcion de ejemplo para el funcionaminto de la red neuronal
@@ -137,7 +137,7 @@ def end_point_nn():
     Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     return make_response(jsonify(resultado),200)
 
-@app.route("/info_sesion",methods=["GET"])
+@application.route("/info_sesion",methods=["GET"])
 @login_required
 def obtener_info_sesion():
     id = request.args.get('id')
@@ -179,7 +179,7 @@ def obtener_info_sesion():
 
 
     
-@app.route("/resultado", methods=['GET'])
+@application.route("/resultado", methods=['GET'])
 @login_required
 def get_resultados():
     user = Usuario.get_user(session["_user_id"])
