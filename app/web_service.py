@@ -23,7 +23,9 @@ from services.reszie_imge import image_resize_average_color
 def load_user(user_name):
     return Usuario.get_user(user_name)
 
-
+@app.route("")
+def inicio():
+    return "hola"
 @app.route("/login", methods=["POST"])
 def login():
 
