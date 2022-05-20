@@ -55,9 +55,9 @@ class Usuario(UserMixin, db.Base):
     name = Column(String(20), nullable=False)
     last_name = Column(String(20), nullable=False)
     type = Column(String(10), nullable=False)
-    
+
     authenticated = Column(Boolean, default=False)
-   
+
     def is_active(self):
         """True, as all users are active."""
         return True
@@ -86,11 +86,11 @@ class Usuario(UserMixin, db.Base):
                 )
             )
             connection.close()
-            
 
     def get_user(user):
         with db.Session.begin() as session:
-            response = session.query(Usuario).where(Usuario.user == user).first()
+            response = session.query(Usuario).where(
+                Usuario.user == user).first()
             session.close()
         return response
     # Eod
@@ -109,7 +109,7 @@ class Usuario(UserMixin, db.Base):
                        )
                    );""".format(user_id, user_id)
 
-        with db.engie.connect() as connection: 
+        with db.engie.connect() as connection:
             result = connection.execute(query)
         # Eow
 
@@ -131,21 +131,21 @@ class Usuario(UserMixin, db.Base):
             )
         today = datetime.today()
         for row in result.fetchall():
-            if row["hora_inicio"] <  today < row["hora_fin"]:
+            if row["hora_inicio"] < today < row["hora_fin"]:
                 return row["id"]
-                
+
         return None
     # Eod
 
-    def get_course_sessions(course_id): 
+    def get_course_sessions(course_id):
         query = """SELECT clase.id AS clase_id, sesion.hora_inicio, sesion.hora_fin, sesion.id AS sesion_id
                    FROM clase, curso, sesion
                    WHERE clase.curso_id = 3194 AND curso.id = clase.curso_id AND sesion.clase_id = clase.id;""".format(course_id)
 
-        with db.engie.connect() as connection: 
+        with db.engie.connect() as connection:
             result = connection.execute(query)
         # Eow
-        return result.all() 
+        return result.all()
     # Eod
 
     def get_actual_sesion_profesor(self):
@@ -164,10 +164,11 @@ class Usuario(UserMixin, db.Base):
             )
         today = datetime.today()
         for row in result.fetchall():
-            if row["hora_inicio"] <  today < row["hora_fin"]:
+            if row["hora_inicio"] < today < row["hora_fin"]:
                 return row["id"]
-                
+
         return None
+
 
 class Curso(db.Base):
     """
@@ -230,13 +231,12 @@ class Sesion(db.Base):
     hora_inicio = Column(DateTime, nullable=False)
     hora_fin = Column(DateTime, nullable=False)
     clase_id = Column(Integer, ForeignKey("clase.id"))
-    
+
     def get_sesion(id):
         with db.Session.begin() as session:
             response = session.query(Sesion).where(Sesion.id == id).first()
             session.close()
         return response
-    
 
 
 class Emocion_x_Estudiante(db.Base):
@@ -260,7 +260,7 @@ class Emocion_x_Estudiante(db.Base):
         with db.engie.connect() as connection:
             now = datetime.today()
             # time_d = 10
-            # if now.second < time_d:             
+            # if now.second < time_d:
             #     seconds = now.second + (60 - time_d)
             #     if now.minute == 0:
             #         minutes = now.minute + (60 - 1)
@@ -271,30 +271,34 @@ class Emocion_x_Estudiante(db.Base):
             # else:
             #     seconds = now.second - time_d
             #     previous =now.replace(second = seconds)
-            
+
             if(now.second > 9):
                 second_before = int(str(now.second)[0]+"0")
                 second_after = int(str(now.second)[0]+"0") + 10
             else:
                 second_before = 0
                 second_after = 10
-            before = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_before)
+            before = datetime(year=now.year, month=now.month, day=now.day,
+                              hour=now.hour, minute=now.minute, second=second_before)
             if second_after != 60:
-                previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute, second=second_after)
+                previous = datetime(year=now.year, month=now.month, day=now.day,
+                                    hour=now.hour, minute=now.minute, second=second_after)
             else:
-                previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute+1, second=0)
+                previous = datetime(year=now.year, month=now.month, day=now.day,
+                                    hour=now.hour, minute=now.minute+1, second=0)
             respuesta = connection.execute("""
                                            SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = {} and (bd_tesis.emocionXestudiante.fecha between '{}' and '{}');
-                            """.format(sesion_id, before - timedelta(seconds=10), previous -timedelta(seconds=10)))
+                            """.format(sesion_id, before - timedelta(seconds=10), previous - timedelta(seconds=10)))
             connection.close()
         return respuesta.fetchall()
 
-    def insert_emocion_estudiante(estudiante_id,sesion_id,fecha,emocion,porcentaje):
+    def insert_emocion_estudiante(estudiante_id, sesion_id, fecha, emocion, porcentaje):
         if(fecha.second > 9):
             second = int(str(fecha.second)[0]+"0")
         else:
             second = 0
-        new_fecha =datetime(year=fecha.year,month=fecha.month,day=fecha.day,hour=fecha.hour,minute=fecha.minute, second=second)
+        new_fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day,
+                             hour=fecha.hour, minute=fecha.minute, second=second)
         try:
             with db.engie.connect() as connection:
                 respuesta = connection.execute(""" 
@@ -313,11 +317,13 @@ class Emocion_x_Estudiante(db.Base):
                 )
                 connection.close()
         except Exception as err:
-            current_app.logger.error("Error en guardar la emocion del estudiante")
+            current_app.logger.error(
+                "Error en guardar la emocion del estudiante")
+
     def get_emocions_for_sesion(sesion_id):
         try:
             with db.engie.connect() as connection:
-                respuesta =  connection.execute("""
+                respuesta = connection.execute("""
                                                 select  bd_tesis.usuario.name,  bd_tesis.usuario.last_name,bd_tesis.emocion.nombre,bd_tesis.emocionXestudiante.fecha  
                                                 from bd_tesis.emocionXestudiante,bd_tesis.emocion,bd_tesis.usuario 
                                                 where 
@@ -327,7 +333,7 @@ class Emocion_x_Estudiante(db.Base):
             return respuesta.fetchall()
         except Exception as err:
             current_app.logger.error("Error al traer los datos")
-            
+
 
 class Horario(db.Base):
     """
@@ -345,6 +351,6 @@ class Horario(db.Base):
     hora_fin = Column(Time)
 
 
-#db.Base.metadata.create_all(db.engie)
+# db.Base.metadata.create_all(db.engie)
 # Usuario.create_user(user="simondavila",password="Banfield2019",name="Simon",last_name="Davila",type_user="estudiante")
-# #print(Usuario.get_user("uzsdg4"))
+# print(Usuario.get_user("uzsdg4"))
