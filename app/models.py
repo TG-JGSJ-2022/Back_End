@@ -150,7 +150,6 @@ class Usuario(UserMixin, db.Base):
 
     def get_actual_sesion_profesor(self):
         with db.engie.connect() as connection:
-            print("id profesor: ", self.id)
             result = connection.execute(
                 """select bd_tesis.sesion.id,bd_tesis.sesion.hora_inicio,bd_tesis.sesion.hora_fin,dia 
                 from bd_tesis.profesorXclase,bd_tesis.clase,bd_tesis.horario,bd_tesis.sesion 
@@ -284,8 +283,15 @@ class Emocion_x_Estudiante(db.Base):
                 previous = datetime(year=now.year, month=now.month, day=now.day,
                                     hour=now.hour, minute=now.minute, second=second_after)
             else:
+<<<<<<< HEAD
                 previous = datetime(year=now.year, month=now.month, day=now.day,
                                     hour=now.hour, minute=now.minute+1, second=0)
+=======
+                if (now.minute < 59 ):
+                    previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute+1, second=0)
+                else:
+                    previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour+1,minute=0, second=0)
+>>>>>>> 76bcf58ee7014f2193e5136835bde8df821fdba1
             respuesta = connection.execute("""
                                            SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = {} and (bd_tesis.emocionXestudiante.fecha between '{}' and '{}');
                             """.format(sesion_id, before - timedelta(seconds=10), previous - timedelta(seconds=10)))
