@@ -141,7 +141,7 @@ def obtener_info_sesion():
     
     try:
         #La sesión la envía el historial.
-        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(10)
+        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(id)
         current_app.logger.info(f"solicitud de sesion {id}")
         if len(resultado) == 0:
             return make_response(jsonify({"error":"no data"}),400)
