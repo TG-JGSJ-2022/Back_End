@@ -28,7 +28,6 @@ def inicio():
     return "hola"
 @application.route("/login", methods=["POST"])
 def login():
-
     req_username = request.json["user"]
     req_password = request.json["password"]
     user = Usuario.get_user(req_username)
@@ -144,7 +143,7 @@ def obtener_info_sesion():
     
     try:
         #La sesión la envía el historial.
-        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(10)
+        resultado = Emocion_x_Estudiante.get_emocions_for_sesion(id)
         current_app.logger.info(f"solicitud de sesion {id}")
         if len(resultado) == 0:
             return make_response(jsonify({"error":"no data"}),400)

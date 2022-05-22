@@ -5,7 +5,7 @@ from shutil import ExecError
 import app.db as db
 from datetime import date, datetime, timedelta
 from flask import current_app
-#import db
+# import db
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -346,5 +346,5 @@ class Horario(db.Base):
 
 
 #db.Base.metadata.create_all(db.engie)
-# Usuario.create_user(user="simondavila",password="Banfield2019",name="Simon",last_name="Davila",type_user="estudiante")
+# Usuario.create_user(user="e4",password="123",name="e4",last_name="e4",type_user="estudiante")
 # #print(Usuario.get_user("uzsdg4"))

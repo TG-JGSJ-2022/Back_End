@@ -1,0 +1,12 @@
+{
+    "AWSEBDockerrunVersion":"1",
+    "Image":{
+        "Name":"julianncho147/python-docker",
+        "Update":"true"
+    },
+    "Ports":[
+        {
+            "ContainerPort":"3000"
+        }
+    ]
+}
