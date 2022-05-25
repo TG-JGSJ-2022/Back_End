@@ -351,6 +351,19 @@ class Horario(db.Base):
     hora_inicio = Column(Time)
     hora_fin = Column(Time)
 
+    def get_class_day(profesor_id):    
+        try:
+            with db.engie.connect() as connection:
+                respuesta = connection.execute("""
+                                                select bd_tesis.profesorXclase.profesor_id, bd_tesis.profesorXclase.clase_id,
+                                                bd_tesis.horario.dia, bd_tesis.horario.hora_inicio, bd_tesis.horario.hora_fin
+                                                from bd_tesis.profesorXclase, bd_tesis.horario
+                                                where 
+                                                bd_tesis.profesorXclase.profesor_id = {} and 
+                                                bd_tesis.profesorXclase.clase_id =  bd_tesis.horario.clase_id;""".format(profesor_id))
+            return respuesta.fetchall()
+        except Exception as err:
+            current_app.logger.error("Error al traer los datos")
 
 #db.Base.metadata.create_all(db.engie)
 # Usuario.create_user(user="e4",password="123",name="e4",last_name="e4",type_user="estudiante")

@@ -203,3 +203,15 @@ def get_resultados():
     print("resultado: ", resultado)
     #TO DO... don't duplicate students count
     return jsonify(list)
+
+@application.route('/profesor-sesion', methods=['GET'])
+@login_required
+def get_sesiones_profesor():
+
+    user = Usuario.get_user(session["_user_id"])
+    horario = []
+    dias_clases = Horario.get_class_day(user.id)
+    for clases in dias_clases:
+        info = {'profesor_id' : clases[0], 'clase_id': clases[1], 'dia' : clases[2], 'hora_inicio' : str(clases[3]), 'hora_fin' : str(clases[4])}
+        horario.append(info)
+    return jsonify(horario)
