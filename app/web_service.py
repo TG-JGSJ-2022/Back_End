@@ -112,12 +112,12 @@ def end_point_nn():
     """
 
     user = Usuario.get_user(session["_user_id"])
-    id_sesion_activa = user.get_actual_sesion_estudiante()
+    # id_sesion_activa = user.get_actual_sesion_estudiante()
 
     if user.type != "estudiante":
         return make_response(jsonify("Acceso denegado"), 403)
-    if id_sesion_activa ==  None:
-        return make_response(jsonify("No hay sesion activa"), 400)
+    # if id_sesion_activa ==  None:
+    #     return make_response(jsonify("No hay sesion activa"), 400)
     re = list(request.json.values())
 
     nparr = np.fromstring(base64.b64decode(re[0]), np.uint8)
@@ -132,7 +132,7 @@ def end_point_nn():
     current_app.logger.info("Calculando emocion")
     today = datetime.strptime(re[1], '%d/%m/%Y, %H:%M:%S')
 
-    Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
+    # Emocion_x_Estudiante.insert_emocion_estudiante(user.id,id_sesion_activa,today,resultado["data"]["prediction"],resultado["data"]["label_confidence"])
     return make_response(jsonify(resultado),200)
 
 @application.route("/info_sesion",methods=["GET"])
