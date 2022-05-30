@@ -19,6 +19,7 @@ from sqlalchemy import (
     Boolean,
     insert,
     select,
+    update
 )
 
 from sqlalchemy.orm import relationship
@@ -236,6 +237,18 @@ class Sesion(db.Base):
             response = session.query(Sesion).where(Sesion.id == id).first()
             session.close()
         return response
+
+    def insert_end_sesion(id):
+        with db.engie.connect() as connection:
+            now = datetime.today()
+            connection.execute(
+                update(Sesion).
+                where(Sesion.id == id).
+                values(hora_fin = now)
+            )
+            connection.close()
+        
+
 
 
 class Emocion_x_Estudiante(db.Base):
