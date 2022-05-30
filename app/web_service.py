@@ -217,3 +217,13 @@ def get_sesiones_profesor():
         info = {'profesor_id' : clases[0], 'clase_id': clases[1], 'dia' : clases[2], 'hora_inicio' : str(clases[3]), 'hora_fin' : str(clases[4])}
         horario.append(info)
     return jsonify(horario)
+
+
+@application.route('/finalizar-sesion', methods=['GET'])
+@login_required
+def finalizar_sesion():
+    user = Usuario.get_user(session["_user_id"])
+    id_sesion_activa = user.get_actual_sesion_profesor()
+    Sesion.insert_end_sesion(id_sesion_activa)
+    response = '"clase finalizada' 
+    return make_response(jsonify(response),200)
