@@ -157,12 +157,14 @@ def obtener_info_sesion():
                 d["nombre"]
             )
             d["emocion"] = r["nombre"]
-            d["fecha"] =  str(r["fecha"])
-            horas.add(str(r["fecha"]))
+            print("{}:{}:{}".format(r["fecha"].hour,r["fecha"].minute,r["fecha"].second))
+            d["fecha"] =  "{}:{}:{}".format(r["fecha"].hour,r["fecha"].minute,r["fecha"].second)
+            horas.add("{}:{}:{}".format(r["fecha"].hour,r["fecha"].minute,r["fecha"].second))
             
             data.append(d)
         horas = list(horas)
-        horas.sort(key= lambda date: datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
+        horas.sort(key= lambda date: datetime.strptime(date, "%H:%M:%S"))
+        
         response = {
             "dates" : horas,
             "data":data,
