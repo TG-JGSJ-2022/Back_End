@@ -377,6 +377,18 @@ class Horario(db.Base):
             return respuesta.fetchall()
         except Exception as err:
             current_app.logger.error("Error al traer los datos")
+    
+    def get_name_class(id_sesion):
+        try:
+            with db.engie.connect() as connection:
+                respuesta = connection.execute("""
+                                                SELECT bd_tesis.curso.nombre, bd_tesis.sesion.hora_inicio 
+                                                FROM bd_tesis.curso, bd_tesis.clase, bd_tesis.sesion
+                                                where bd_tesis.sesion.id = {} and bd_tesis.curso.id = bd_tesis.clase.curso_id and 
+                                                bd_tesis.sesion.clase_id = bd_tesis.clase.id;""".format(id_sesion))
+            return respuesta.fetchall()
+        except Exception as err:
+            current_app.logger.error("Error al traer los datos")
 
 #db.Base.metadata.create_all(db.engie)
 # Usuario.create_user(user="e4",password="123",name="e4",last_name="e4",type_user="estudiante")

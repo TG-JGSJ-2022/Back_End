@@ -191,14 +191,22 @@ def get_resultados():
     else:
         print("Else")
         resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(id_sesion_activa)    
+        data = Horario.get_name_class(id_sesion_activa)
+        for ex in data:
+            print(ex)
+            info_aux = {'name': ex[0], 'date': ex[1] }
         print(resultado)   
         if not resultado:
             info = {'status' : 0}
+            info['name'] = ex[0]
+            info['date'] = ex[1]
             list.append(info)
         else:
             for ex in resultado:
                 porcentaje = ex[4] * 100
                 info = { 'emocion_id' : ex[3], 'sesion_id' : ex[1], 'porcentaje': porcentaje, 'estudiante_id' : ex[0], 'fecha' : ex[2], 'status' : 0 }
+                info['name'] = ex[0]
+                info['date'] = ex[1]
                 list.append(info)
                 info = {}
     print("List: ", list)
@@ -217,7 +225,6 @@ def get_sesiones_profesor():
         info = {'profesor_id' : clases[0], 'clase_id': clases[1], 'dia' : clases[2], 'hora_inicio' : str(clases[3]), 'hora_fin' : str(clases[4])}
         horario.append(info)
     return jsonify(horario)
-
 
 @application.route('/finalizar-sesion', methods=['GET'])
 @login_required
