@@ -41,7 +41,7 @@ def login():
     login_user(user)
 
     response_user = {'username': user.user, 'id': user.id,
-                     "rol":user.type}
+                     "rol":user.type, 'name': user.name}
 
     return make_response(jsonify(response_user), 200)
 # Eod
