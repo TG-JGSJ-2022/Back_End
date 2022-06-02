@@ -141,7 +141,7 @@ class Usuario(UserMixin, db.Base):
     def get_course_sessions(course_id):
         query = """SELECT clase.id AS clase_id, sesion.hora_inicio, sesion.hora_fin, sesion.id AS sesion_id
                    FROM clase, curso, sesion
-                   WHERE clase.curso_id = 3194 AND curso.id = clase.curso_id AND sesion.clase_id = clase.id;""".format(course_id)
+                   WHERE clase.curso_id = {} AND curso.id = clase.curso_id AND sesion.clase_id = clase.id;""".format(course_id)
 
         with db.engie.connect() as connection:
             result = connection.execute(query)
@@ -270,7 +270,7 @@ class Emocion_x_Estudiante(db.Base):
 
     def get_emocion_x_estudiante(sesion_id):
         with db.engie.connect() as connection:
-            now = datetime.today()
+            now = datetime.now() - timedelta(seconds=9)
             # time_d = 10
             # if now.second < time_d:
             #     seconds = now.second + (60 - time_d)
@@ -283,26 +283,21 @@ class Emocion_x_Estudiante(db.Base):
             # else:
             #     seconds = now.second - time_d
             #     previous =now.replace(second = seconds)
-
+            print(now)
             if(now.second > 9):
-                second_before = int(str(now.second)[0]+"0")
-                second_after = int(str(now.second)[0]+"0") + 10
+                seconds = int(str(now.second)[0]+"0") 
             else:
-                second_before = 0
-                second_after = 10
-            before = datetime(year=now.year, month=now.month, day=now.day,
-                              hour=now.hour, minute=now.minute, second=second_before)
-            if second_after != 60:
-                previous = datetime(year=now.year, month=now.month, day=now.day,
-                                    hour=now.hour, minute=now.minute, second=second_after)
-            else:
-                if (now.minute < 59 ):
-                    previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute+1, second=0)
-                else:
-                    previous = datetime(year=now.year,month=now.month,day=now.day,hour=now.hour+1,minute=0, second=0)
-            respuesta = connection.execute("""
-                                           SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = {} and (bd_tesis.emocionXestudiante.fecha between '{}' and '{}');
-                            """.format(sesion_id, before - timedelta(seconds=10), previous - timedelta(seconds=10)))
+                seconds = 0
+            print("seconds",seconds)
+            date = datetime(year=now.year, month=now.month, day=now.day,
+                              hour=now.hour, minute=now.minute, second=seconds if seconds <= 59 else 0)
+
+            #print(seconds)
+            query ="""
+                                           SELECT * FROM bd_tesis.emocionXestudiante where bd_tesis.emocionXestudiante.sesion_id = {} and bd_tesis.emocionXestudiante.fecha = '{}' ;
+                            """.format(sesion_id, date)
+            print(query)
+            respuesta = connection.execute(query)
             connection.close()
         return respuesta.fetchall()
 

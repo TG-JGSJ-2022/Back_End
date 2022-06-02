@@ -41,7 +41,7 @@ def login():
     login_user(user)
 
     response_user = {'username': user.user, 'id': user.id,
-                     "rol":user.type, 'name': user.name}
+                     "rol":user.type, 'name': user.name }
 
     return make_response(jsonify(response_user), 200)
 # Eod
@@ -157,7 +157,7 @@ def obtener_info_sesion():
                 d["nombre"]
             )
             d["emocion"] = r["nombre"]
-            print("{}:{}:{}".format(r["fecha"].hour,r["fecha"].minute,r["fecha"].second))
+            
             d["fecha"] =  "{}:{}:{}".format(r["fecha"].hour,r["fecha"].minute,r["fecha"].second)
             horas.add("{}:{}:{}".format(r["fecha"].hour,r["fecha"].minute,r["fecha"].second))
             
@@ -189,13 +189,11 @@ def get_resultados():
         info = {'status': 1}
         list.append(info)
     else:
-        print("Else")
         resultado = Emocion_x_Estudiante.get_emocion_x_estudiante(id_sesion_activa)    
         data = Horario.get_name_class(id_sesion_activa)
         for ex in data:
-            print(ex)
-            info_aux = {'name': ex[0], 'date': ex[1] }
-        print(resultado)   
+            name = ex[0]
+            date = ex[1] 
         if not resultado:
             info = {'status' : 0}
             info['name'] = ex[0]
@@ -205,13 +203,11 @@ def get_resultados():
             for ex in resultado:
                 porcentaje = ex[4] * 100
                 info = { 'emocion_id' : ex[3], 'sesion_id' : ex[1], 'porcentaje': porcentaje, 'estudiante_id' : ex[0], 'fecha' : ex[2], 'status' : 0 }
-                info['name'] = ex[0]
-                info['date'] = ex[1]
+                info['name'] = name
+                info['date'] = date
                 list.append(info)
                 info = {}
-    print("List: ", list)
-    print("resultado: ", resultado)
-    #TO DO... don't duplicate students count
+            print(len(list))
     return jsonify(list)
 
 @application.route('/profesor-sesion', methods=['GET'])
